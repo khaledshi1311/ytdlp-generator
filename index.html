@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>yt-dlp Command Generator</title>
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #eaeaea;
+      font-family: monospace;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      color: #ff4d6d;
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      background: #1c1c1c;
+      color: #fff;
+      border: 1px solid #333;
+    }
+    pre {
+      margin-top: 30px;
+      padding: 15px;
+      background: #111;
+      border: 1px solid #333;
+      color: #7CFC98;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>yt-dlp Linux Command Generator</h1>
+
+  <label>Video URL</label>
+  <input id="url" placeholder="https://..." />
+
+  <label>Download Type</label>
+  <select id="type">
+    <option value="video">Video</option>
+    <option value="audio">Audio (mp3)</option>
+  </select>
+
+  <label>Quality</label>
+  <select id="quality">
+    <option value="best">Best</option>
+    <option value="1080">1080p</option>
+    <option value="720">720p</option>
+  </select>
+
+  <label>Output Folder</label>
+  <input id="folder" placeholder="~/Downloads" value="~/Downloads" />
+
+  <label>Filename Template</label>
+  <input id="template" value="%(title)s.%(ext)s" />
+
+  <pre id="output">yt-dlp …</pre>
+
+  <script>
+    const inputs = document.querySelectorAll("input, select");
+    inputs.forEach(i => i.addEventListener("input", generate));
+
+    function generate() {
+      const url = document.getElementById("url").value;
+      const type = document.getElementById("type").value;
+      const quality = document.getElementById("quality").value;
+      const folder = document.getElementById("folder").value;
+      const template = document.getElementById("template").value;
+
+      if (!url) {
+        document.getElementById("output").textContent = "yt-dlp …";
+        return;
+      }
+
+      let cmd = `yt-dlp "${url}" -o "${folder}/${template}"`;
+
+      if (type === "audio") {
+        cmd += " -x --audio-format mp3";
+      } else {
+        if (quality !== "best") {
+          cmd += ` -f "bv*[height<=${quality}]+ba/b"`;
+        }
+      }
+
+      document.getElementById("output").textContent = cmd;
+    }
+  </script>
+
+</body>
+</html>
