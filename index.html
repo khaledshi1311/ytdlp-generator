@@ -2,29 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>yt-dlp Quick Generator</title>
+<title>yt-dlp Header Command Generator</title>
 </head>
 <body>
-<h2>Quick yt-dlp Command Generator</h2>
+<h2>yt-dlp Full Command Generator</h2>
 
 <label>Video URL:</label><br>
-<input id="url" placeholder="https://..." style="width:100%"><br><br>
+<input id="url" placeholder="Paste URL here" style="width:100%"><br><br>
 
-<label>Cookies (optional, full path to cookies.txt):</label><br>
-<input id="cookies" placeholder="Leave blank if none" style="width:100%"><br><br>
+<label>Referer Header:</label><br>
+<input id="referer" placeholder="https://example.com/" style="width:100%"><br><br>
 
-<label>Download Type:</label><br>
-<select id="type">
-  <option value="video">Video</option>
-  <option value="audio">Audio (mp3)</option>
-</select><br><br>
+<label>User-Agent Header:</label><br>
+<input id="useragent" placeholder="Mozilla/5.0 ..." style="width:100%"><br><br>
 
-<label>Quality (video only):</label><br>
-<select id="quality">
-  <option value="best">Best</option>
-  <option value="1080">1080p</option>
-  <option value="720">720p</option>
-</select><br><br>
+<label>Output Filename:</label><br>
+<input id="filename" placeholder="video10.%(ext)s" style="width:100%"><br><br>
+
+<label>Format:</label><br>
+<input id="format" placeholder="bv*+ba/b" style="width:100%" value="bv*+ba/b"><br><br>
 
 <button onclick="generate()">Generate Command</button>
 
@@ -34,27 +30,23 @@
 <script>
 function generate() {
   const url = document.getElementById("url").value.trim();
-  const cookies = document.getElementById("cookies").value.trim();
-  const type = document.getElementById("type").value;
-  const quality = document.getElementById("quality").value;
+  const referer = document.getElementById("referer").value.trim();
+  const ua = document.getElementById("useragent").value.trim();
+  const filename = document.getElementById("filename").value.trim() || "video.%(ext)s";
+  const format = document.getElementById("format").value.trim() || "bv*+ba/b";
 
   if (!url) {
     document.getElementById("output").textContent = "Enter a video URL!";
     return;
   }
 
-  // Base command
-  let cmd = `yt-dlp "${url}" -o "~/%(title)s.%(ext)s"`;
-
-  // Cookies
-  if (cookies) cmd += ` --cookies "${cookies}"`;
-
-  // Type
-  if (type === "audio") {
-    cmd += " -x --audio-format mp3";
-  } else if (quality !== "best") {
-    cmd += ` -f "bv*[height<=${quality}]+ba/b"`;
-  }
+  let cmd = 'yt-dlp \\\n';
+  if (referer) cmd += `  --add-header "Referer: ${referer}" \\\n`;
+  if (ua) cmd += `  --add-header "User-Agent: ${ua}" \\\n`;
+  cmd += `  -f "${format}" \\\n`;
+  cmd += '  --merge-output-format mp4 \\\n';
+  cmd += `  -o "${filename}" \\\n`;
+  cmd += `  "${url}"`;
 
   document.getElementById("output").textContent = cmd;
 }
