@@ -40,16 +40,13 @@ function generate() {
     return;
   }
 
-  let cmd = 'yt-dlp \\\n';
-  if (referer) cmd += `  --add-header "Referer: ${referer}" \\\n`;
-  if (ua) cmd += `  --add-header "User-Agent: ${ua}" \\\n`;
-  cmd += `  -f "${format}" \\\n`;
-  cmd += '  --merge-output-format mp4 \\\n';
-  cmd += `  -o "${filename}" \\\n`;
-  cmd += `  "${url}"`;
+  // Single-line command for foolproof Bash
+  let cmd = 'yt-dlp';
+  if (referer) cmd += ` --add-header "Referer: ${referer}"`;
+  if (ua) cmd += ` --add-header "User-Agent: ${ua}"`;
+  cmd += ` -f "${format}" --merge-output-format mp4 -o "${filename}" "${url}"`;
 
   document.getElementById("output").textContent = cmd;
 }
 </script>
-</body>
-</html>
+
