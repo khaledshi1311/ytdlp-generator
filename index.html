@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>yt-dlp Header Command Generator</title>
+<title>yt-dlp Command Generator</title>
 </head>
 <body>
-<h2>yt-dlp Full Command Generator</h2>
+<h2>yt-dlp Command Generator (Safe for Bash)</h2>
 
 <label>Video URL:</label><br>
-<input id="url" placeholder="Paste URL here" style="width:100%"><br><br>
+<input id="url" placeholder="Paste video URL here" style="width:100%"><br><br>
 
 <label>Referer Header:</label><br>
 <input id="referer" placeholder="https://example.com/" style="width:100%"><br><br>
@@ -40,13 +40,14 @@ function generate() {
     return;
   }
 
-  // Single-line command for foolproof Bash
+  // Single-line, safe for Bash with URL in single quotes
   let cmd = 'yt-dlp';
   if (referer) cmd += ` --add-header "Referer: ${referer}"`;
   if (ua) cmd += ` --add-header "User-Agent: ${ua}"`;
-  cmd += ` -f "${format}" --merge-output-format mp4 -o "${filename}" "${url}"`;
+  cmd += ` -f "${format}" --merge-output-format mp4 -o "${filename}" '${url}'`;
 
   document.getElementById("output").textContent = cmd;
 }
 </script>
-
+</body>
+</html>
