@@ -1,53 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>yt-dlp Command Generator</title>
+  <title>Command Generator</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #111; color: #eee; }
+    textarea, input { width: 100%; margin-top: 10px; padding: 10px; background: #222; color: #eee; border: 1px solid #444; }
+    button { margin-top: 15px; padding: 10px 20px; background: #00adb5; border: none; cursor: pointer; }
+    pre { background: #000; padding: 15px; margin-top: 20px; overflow-x: auto; }
+  </style>
 </head>
 <body>
-<h2>yt-dlp Command Generator (Safe for Bash)</h2>
 
-<label>Video URL:</label><br>
-<input id="url" placeholder="Paste video URL here" style="width:100%"><br><br>
+<h2>Paste curl → get yt-dlp command</h2>
 
-<label>Referer Header:</label><br>
-<input id="referer" placeholder="https://example.com/" style="width:100%"><br><br>
+<textarea id="input" rows="10" placeholder="Paste curl here"></textarea>
 
-<label>User-Agent Header:</label><br>
-<input id="useragent" placeholder="Mozilla/5.0 ..." style="width:100%"><br><br>
+<input type="number" id="num" placeholder="Video number">
 
-<label>Output Filename:</label><br>
-<input id="filename" placeholder="video10.%(ext)s" style="width:100%"><br><br>
+<button onclick="convert()">Generate</button>
 
-<label>Format:</label><br>
-<input id="format" placeholder="bv*+ba/b" style="width:100%" value="bv*+ba/b"><br><br>
-
-<button onclick="generate()">Generate Command</button>
-
-<h3>Copy & Paste this into your Linux shell:</h3>
-<pre id="output">yt-dlp …</pre>
+<pre id="output"></pre>
 
 <script>
-function generate() {
-  const url = document.getElementById("url").value.trim();
-  const referer = document.getElementById("referer").value.trim();
-  const ua = document.getElementById("useragent").value.trim();
-  const filename = document.getElementById("filename").value.trim() || "video.%(ext)s";
-  const format = document.getElementById("format").value.trim() || "bv*+ba/b";
+function convert() {
+  let text = document.getElementById("input").value;
+  let num = document.getElementById("num").value || "1";
 
-  if (!url) {
-    document.getElementById("output").textContent = "Enter a video URL!";
-    return;
+  try {
+    let urlMatch = text.match(/'(https:\/\/[^']+\.m3u8[^']*)'/);
+    if (!urlMatch) throw "No URL found";
+    let url = urlMatch[1];
+
+    let headers = [...text.matchAll(/-H '([^:]+):\s*(.*?)'/g)];
+
+    let headerLines = headers.map(h => 
+      `  --add-header "${h[1]}: ${h[2]}" \\`
+    ).join("\n");
+
+    let result = `yt-dlp \\
+${headerLines}
+  -f "bv*+ba/b" \\
+  --merge-output-format mp4 \\
+  -o "video${num}.%(ext)s" \\
+  "${url}"`;
+
+    document.getElementById("output").textContent = result;
+
+  } catch (e) {
+    document.getElementById("output").textContent = "❌ Error: Could not parse curl command";
   }
-
-  // Single-line, safe for Bash with URL in single quotes
-  let cmd = 'yt-dlp';
-  if (referer) cmd += ` --add-header "Referer: ${referer}"`;
-  if (ua) cmd += ` --add-header "User-Agent: ${ua}"`;
-  cmd += ` -f "${format}" --merge-output-format mp4 -o "${filename}" '${url}'`;
-
-  document.getElementById("output").textContent = cmd;
 }
 </script>
+
 </body>
 </html>
