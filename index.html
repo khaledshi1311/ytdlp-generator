@@ -37,12 +37,18 @@ function convert() {
       `  --add-header "${h[1]}: ${h[2]}" \\`
     ).join("\n");
 
-    let result = `yt-dlp \\
+ let result = `# Download
+yt-dlp \\
 ${headerLines}
   -f "bv*+ba/b" \\
   --merge-output-format mp4 \\
   -o "video${num}.%(ext)s" \\
-  "${url}"`;
+  "${url}"
+
+# Fix timestamps
+ffmpeg -fflags +genpts -avoid_negative_ts make_zero \\
+  -i video${num}.mp4 \\
+  -c copy video${num}_fixed.mp4`;
 
     document.getElementById("output").textContent = result;
 
